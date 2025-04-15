@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mcp_tts_server"
+version = "0.1.0"
+description = "MCP Server wrapper for TTS engines (Kokoro TTS and OpenAI TTS)"
+requires-python = ">=3.10"
+dependencies = [
+    "openai[voice_helpers]>=1.70.0",
+    "termcolor",
+    "mcp[cli]>=1.4.0",
+    "python-dotenv",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "black",
+]
+
+[tool.setuptools]
+py-modules = ["tts_mcp", "speak"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311"] 
