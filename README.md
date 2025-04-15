@@ -24,8 +24,8 @@ A simple yet powerful command-line interface for the Kokoro Text-to-Speech syste
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/kokoro-tts-cli.git
-cd kokoro-tts-cli
+git clone https://github.com/kristofferv98/MCP_tts_server.git
+cd MCP_tts_server
 
 # Create a virtual environment and install dependencies
 uv venv
@@ -122,8 +122,8 @@ A versatile TTS (Text-to-Speech) server built on the MCP (Multi-model Command Pr
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/mcp_tts_server.git
-cd mcp_tts_server
+git clone https://github.com/kristofferv98/MCP_tts_server.git
+cd MCP_tts_server
 
 # Create a virtual environment and install dependencies
 uv venv
@@ -156,10 +156,12 @@ python tts_mcp.py
 uv run python tts_mcp.py
 ```
 
-The server exposes two main tools:
+The server exposes the following main tools:
 
-1. `speak` - Uses Kokoro TTS (local engine)
-2. `openai_speak` - Uses OpenAI TTS (cloud API)
+1. `tts` - Main TTS tool that can use either Kokoro or OpenAI engines
+2. `tts_stop_playback_and_clear_queue` - Stops current playback and clears the queue
+3. `tts_examples` - Provides example phrases for testing
+4. `get_tts_instructions` - Returns instructions for using the TTS tools
 
 ### Client Integration
 
@@ -173,13 +175,14 @@ async def main():
     await client.connect("mcp://127.0.0.1:8000")  # Replace with your server address
     
     # Use Kokoro TTS
-    await client.call("speak", text="Hello, this is Kokoro TTS.", speed=1.2)
+    await client.call("tts", text="Hello, this is Kokoro TTS.", speed=1.2, engine="kokoro")
     
     # Use OpenAI TTS
     await client.call(
-        "openai_speak", 
+        "tts", 
         text="Hello, this is OpenAI TTS.", 
         voice="nova",
+        engine="openai",
         instructions="Speak with enthusiasm"
     )
 ```

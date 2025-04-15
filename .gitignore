@@ -54,3 +54,5 @@ Thumbs.db
 !examples/*.wav
 !examples/*.mp3
 uv.lock 
+old_functions.py
+get-pip.py 
