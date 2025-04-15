@@ -169,15 +169,14 @@ The server exposes the following MCP tools:
 
 ## Direct Usage
 
-You can also run the MCP server directly:
+The primary way to use this server is through Claude Desktop integration as described above. However, you can also run the server directly for testing purposes:
 
 ```bash
-# Using Python directly
-python tts_mcp.py
-
-# Or using uv to run with proper environment
+# Run with the uv environment manager
 uv run python tts_mcp.py
 ```
+
+This will start the MCP server, making it available for connection.
 
 ## Available Voices
 
