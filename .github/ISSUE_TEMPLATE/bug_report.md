@@ -27,7 +27,7 @@ Paste your terminal output here
 
 **Environment (please complete the following information):**
  - OS: [e.g. macOS, Windows, Linux]
- - Python Version: [e.g. 3.8, 3.9]
+ - Python Version: [e.g. 3.10, 3.11]
  - Kokoro TTS CLI Version: [e.g. 0.1.0]
 
 **Additional context**

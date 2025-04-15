@@ -1,115 +1,19 @@
-# Kokoro TTS CLI
-
-A simple yet powerful command-line interface for the Kokoro Text-to-Speech system.
-
-## Features
-
-- 💬 High-quality text-to-speech generation using the Kokoro engine
-- 🔄 Real-time streaming playback as speech segments are generated
-- 🎵 Multiple output formats (WAV and MP3)
-- 🔌 Cross-platform audio playback (macOS, Linux, Windows)
-- 🧵 Async/await implementation for better performance
-- 🚀 Automatic dependency installation
-- 📦 Single self-contained file
-
-## Installation
-
-### Prerequisites
-
-- Python 3.10 or higher
-- [uv](https://github.com/astral-sh/uv) package manager
-- ffmpeg (for MP3 conversion)
-
-### Quick Install
-
-```bash
-# Clone the repository
-git clone https://github.com/kristofferv98/MCP_tts_server.git
-cd MCP_tts_server
-
-# Create a virtual environment and install dependencies
-uv venv
-uv pip install -r requirements.txt
-```
-
-## Usage
-
-Run the script with `uv run`:
-
-```bash
-# Basic usage
-uv run speak.py "Hello, this is a text-to-speech test."
-
-# With custom voice and speed
-uv run speak.py "Hello, this is a test." --voice af_heart --speed 1.2
-
-# Generate MP3 audio
-uv run speak.py "Hello, this is a test." --format mp3
-
-# Save to a specific file
-uv run speak.py "Hello, this is a test." --output my_speech.wav
-
-# Generate audio without playing it
-uv run speak.py "Hello, this is a test." --no-play
-
-# Disable streaming (wait until all segments are generated before playing)
-uv run speak.py "A very long text to convert to speech..." --no-stream
-```
-
-## Options
-
-- `--voice VOICE` - Voice to use (default: af_heart)
-- `--speed SPEED` - Speech speed (default: 1.0)
-- `--format FORMAT` - Output format: wav or mp3 (default: wav)
-- `--output FILE` - Save to a specific output file instead of a temporary file
-- `--no-play` - Generate the audio file without playing it
-- `--no-stream` - Don't stream audio as it's generated (wait until all is ready)
-
-## Streaming vs Non-Streaming Mode
-
-### Streaming Mode (Default)
-In streaming mode, the system plays each segment of audio as soon as it's generated, providing immediate feedback and a better experience for longer texts.
-
-### Non-Streaming Mode
-In non-streaming mode (`--no-stream`), the system waits until all segments are generated before playing the combined audio file. This can result in a more polished output without any potential gaps between segments.
-
-## Project Structure
-
-- `speak.py` - Main script containing the TTS functionality
-- `requirements.txt` - List of Python dependencies
-- `LICENSE` - MIT License
-- `.gitignore` - Standard Python gitignore file
-
-## Dependencies
-
-The application uses:
-- `kokoro` - For text-to-speech generation
-- `numpy` and `soundfile` - For audio processing
-- `termcolor` - For colorized terminal output
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
 # MCP TTS Server
 
-A versatile TTS (Text-to-Speech) server built on the MCP (Multi-model Command Protocol) framework. This server provides access to multiple TTS engines:
+A versatile TTS (Text-to-Speech) server built on the Model Context Protocol (MCP) framework. This server provides access to multiple TTS engines through a unified interface:
 
 1. **Kokoro TTS** - High-quality local TTS engine
 2. **OpenAI TTS** - Cloud-based TTS via OpenAI's API
 
 ## Features
 
-- 🌐 Multiple TTS engines in one server
-- 🎧 Real-time streaming audio playback while generating
-- 🔄 MCP protocol support for easy integration with various clients
+- 🌐 Multiple TTS engines in one unified server
+- 🎧 Real-time streaming audio playback
+- 🔄 MCP protocol support for seamless integration with Claude and other LLMs
 - 🎛️ Configurable voice selection for both engines
-- 💬 Support for voice customization via instructions (OpenAI)
-- ⚡ Speed adjustment for local Kokoro TTS
+- 💬 Support for voice customization via natural language instructions (OpenAI)
+- ⚡ Speed adjustment for both TTS engines
+- 🛑 Playback control for stopping audio and clearing the queue
 
 ## Installation
 
@@ -117,6 +21,7 @@ A versatile TTS (Text-to-Speech) server built on the MCP (Multi-model Command Pr
 
 - Python 3.10 or higher
 - [uv](https://github.com/astral-sh/uv) package manager
+- OpenAI API key (for OpenAI TTS functionality)
 
 ### Quick Install
 
@@ -127,6 +32,7 @@ cd MCP_tts_server
 
 # Create a virtual environment and install dependencies
 uv venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 uv pip install -e .
 ```
 
@@ -144,9 +50,113 @@ Edit the `.env` file to add your OpenAI API key:
 OPENAI_API_KEY=your_openai_api_key_here
 ```
 
-## Usage
+## Integration with Claude Desktop
 
-Run the MCP server:
+To use this server with Claude Desktop:
+
+1. Install the server:
+   ```bash
+   fastmcp install ./tts_mcp.py --name tts
+   ```
+
+2. Alternatively, you can manually add the server to Claude Desktop's configuration file:
+   - Mac: `~/.claude/claude_desktop_config.json`
+   - Windows: `%APPDATA%\claude\claude_desktop_config.json`
+
+   Add this entry to the `mcpServers` section:
+
+   ```json
+   "tts": {
+     "command": "/bin/bash",
+     "args": [
+       "-c",
+       "cd /path/to/MCP_tts_server && source .venv/bin/activate && python tts_mcp.py"
+     ],
+     "env": {
+       "OPENAI_API_KEY": "your_api_key_here"
+     }
+   }
+   ```
+
+## MCP Function Definitions
+
+The server exposes the following MCP tools:
+
+### Main TTS Function
+
+```json
+{
+  "description": "Convert text to speech using the preferred engine and streams the speech to the user. The base voice for the AI is the Kokoro engine, to keep AI's personality consistent. This unified function provides access to both Kokoro TTS (local) and OpenAI TTS (cloud API).",
+  "name": "tts",
+  "parameters": {
+    "properties": {
+      "text": {"title": "Text", "type": "string"},
+      "engine": {"default": "kokoro", "title": "Engine", "type": "string"},
+      "speed": {"default": 1, "title": "Speed", "type": "number"},
+      "voice": {"default": "", "title": "Voice", "type": "string"},
+      "instructions": {"default": "", "title": "Instructions", "type": "string"}
+    },
+    "required": ["text"]
+  }
+}
+```
+
+#### Parameters:
+
+- **text** (required): Text to convert to speech
+- **engine** (optional): TTS engine to use - "kokoro" (default, local) or "openai" (cloud)
+- **speed** (optional): Playback speed (0.8-1.5 typical)
+- **voice** (optional): Voice name to use (engine-specific)
+- **instructions** (optional): Voice customization instructions for OpenAI TTS
+
+### Stop Playback Function
+
+```json
+{
+  "description": "Stops the currently playing audio (if any) and clears all pending TTS requests from the queue. Relies on the background worker detecting the cancellation signal.",
+  "name": "tts_stop_playback_and_clear_queue",
+  "parameters": {
+    "properties": {}
+  }
+}
+```
+
+### Voice Examples Function
+
+```json
+{
+  "description": "Provides research-based examples of effective voice instructions for OpenAI TTS.",
+  "name": "tts_examples",
+  "parameters": {
+    "properties": {
+      "category": {"default": "general", "title": "Category", "type": "string"}
+    }
+  }
+}
+```
+
+#### Categories:
+- general
+- accents
+- characters
+- emotions
+- narration
+
+### Get TTS Instructions Function
+
+```json
+{
+  "description": "Fetches TTS instructions by calling get_voice_info.",
+  "name": "get_tts_instructions",
+  "parameters": {
+    "properties": {}
+  }
+}
+```
+
+## Direct Usage
+
+You can also run the MCP server directly:
 
 ```bash
 # Using Python directly
@@ -155,13 +165,6 @@ python tts_mcp.py
 # Or using uv to run with proper environment
 uv run python tts_mcp.py
 ```
-
-The server exposes the following main tools:
-
-1. `tts` - Main TTS tool that can use either Kokoro or OpenAI engines
-2. `tts_stop_playback_and_clear_queue` - Stops current playback and clears the queue
-3. `tts_examples` - Provides example phrases for testing
-4. `get_tts_instructions` - Returns instructions for using the TTS tools
 
 ### Client Integration
 
@@ -196,9 +199,35 @@ async def main():
 - Available voices: `alloy`, `ash`, `ballad`, `coral`, `echo`, `fable`, `onyx`, `nova`, `sage`, `shimmer`
 - Default model: `gpt-4o-mini-tts`
 
+## Development and Testing
+
+To test the server locally during development:
+
+```bash
+fastmcp dev ./tts_mcp.py
+```
+
+This will start the MCP Inspector interface where you can test the server's functionality.
+
+## Implementation Details
+
+The server is implemented using FastMCP and follows best practices for MCP server development:
+
+- **Unified Interface**: A single function supports both Kokoro and OpenAI engines
+- **Streaming Support**: Audio is streamed directly to the client when possible
+- **Fallback Mechanisms**: File-based playback when streaming isn't available
+- **Voice Customization**: Support for natural language instructions with OpenAI TTS
+- **Lifespan Management**: Proper initialization and cleanup of resources
+
+## Troubleshooting
+
+- **No Audio Output**: Check your system's audio configuration
+- **OpenAI TTS Failures**: Verify your API key is valid and has TTS access permissions
+- **Server Not Found**: Make sure the MCP server is correctly registered in your MCP host
+
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the Apache License 2.0 - see the LICENSE file for details.
 
 ## Contributing
 
