@@ -179,33 +179,6 @@ python tts_mcp.py
 uv run python tts_mcp.py
 ```
 
-### Client Integration
-
-You can connect to this MCP server using any MCP client. Example:
-
-```python
-from mcp.client import MCPClient
-
-async def main():
-    client = MCPClient()
-    await client.connect("mcp://127.0.0.1:8000")  # Replace with your server address
-    
-    # Use with Claude Desktop (server name must match configuration)
-    await client.connect_to_named_server("kokoro_tts")
-    
-    # Use Kokoro TTS
-    await client.call("tts", text="Hello, this is Kokoro TTS.", speed=1.2, engine="kokoro")
-    
-    # Use OpenAI TTS
-    await client.call(
-        "tts", 
-        text="Hello, this is OpenAI TTS.", 
-        voice="nova",
-        engine="openai",
-        instructions="Speak with enthusiasm"
-    )
-```
-
 ## Available Voices
 
 ### Kokoro TTS
