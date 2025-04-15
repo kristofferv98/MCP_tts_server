@@ -60,21 +60,34 @@ To use this server with Claude Desktop:
    ```
 
 2. Alternatively, you can manually add the server to Claude Desktop's configuration file:
-   - Mac: `~/.claude/claude_desktop_config.json`
-   - Windows: `%APPDATA%\claude\claude_desktop_config.json`
+   - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+   - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
 
    Add this entry to the `mcpServers` section:
 
    ```json
-   "tts": {
-     "command": "/bin/bash",
+   "kokoro_tts": {
+     "command": "uv",
      "args": [
-       "-c",
-       "cd /path/to/MCP_tts_server && source .venv/bin/activate && python tts_mcp.py"
-     ],
-     "env": {
-       "OPENAI_API_KEY": "your_api_key_here"
-     }
+       "--directory",
+       "/path/to/MCP_tts_server",
+       "run",
+       "tts_mcp.py"
+     ]
+   }
+   ```
+
+   Example configuration using the full path to uv:
+
+   ```json
+   "kokoro_tts": {
+     "command": "/Users/username/.local/bin/uv",
+     "args": [
+       "--directory",
+       "/Users/username/Documents/MCP_Servers/MCP_tts_server",
+       "run",
+       "tts_mcp.py"
+     ]
    }
    ```
 
@@ -176,6 +189,9 @@ from mcp.client import MCPClient
 async def main():
     client = MCPClient()
     await client.connect("mcp://127.0.0.1:8000")  # Replace with your server address
+    
+    # Use with Claude Desktop (server name must match configuration)
+    await client.connect_to_named_server("kokoro_tts")
     
     # Use Kokoro TTS
     await client.call("tts", text="Hello, this is Kokoro TTS.", speed=1.2, engine="kokoro")
