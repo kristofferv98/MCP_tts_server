@@ -169,7 +169,7 @@ The server exposes the following MCP tools:
 
 ## Direct Usage
 
-The primary way to use this server is through Claude Desktop integration as described above. However, you can also run the server directly for testing purposes:
+The primary way to use this server is through Claude Desktop or other MCP supported integration as described above. However, you can also run the server directly for testing purposes:
 
 ```bash
 # Run with the uv environment manager
