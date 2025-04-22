@@ -174,6 +174,9 @@ The primary way to use this server is through Claude Desktop or other MCP suppor
 ```bash
 # Run with the uv environment manager
 uv run python tts_mcp.py
+
+# Or use the simplified Kokoro-only version
+uv run python simple_tts_mcp.py
 ```
 
 This will start the MCP server, making it available for connection.
